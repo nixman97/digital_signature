@@ -29,7 +29,7 @@ class Sha256:
         for i in k_int:
             self.k.append(bitarray(format(i, "032b")))
 
-    def logic_and(self, array1, array2):
+    def __logic_and(self, array1, array2):
         return_array = bitarray()
         for i in range(len(array1)):
             if array1[i] == 1 and array2[i] == 1:
@@ -38,7 +38,7 @@ class Sha256:
                 return_array.append(0)
         return return_array
 
-    def logic_not(self, array):
+    def __logic_not(self, array):
         return_array = bitarray()
         for i in range(len(array)):
             if array[i] == 0:
@@ -47,7 +47,7 @@ class Sha256:
                 return_array.append(0)
         return return_array
 
-    def array_sum(self, array1, array2):
+    def __array_sum(self, array1, array2):
         return_array = bitarray()
         hold = 0
         for i in range(32):
@@ -60,7 +60,7 @@ class Sha256:
                 hold = 0
         return return_array
 
-    def xor(self, array1, array2):
+    def __xor(self, array1, array2):
         return_array = bitarray()
         for i in range(len(array1)):
             if (array1[i] == 1 and array2[i] == 0) or (array1[i] == 0 and array2[i] == 1):
@@ -69,20 +69,20 @@ class Sha256:
                 return_array.append(0)
         return return_array
 
-    def leftshift(self, array, count):
+    def __leftshift(self, array, count):
         return array[count:] + (bitarray('0') * count)
 
-    def rightshift(self, array, count):
+    def __rightshift(self, array, count):
         return (bitarray('0') * count) + array[:-count]
 
-    def rightrotate(self, array, count):
+    def __rightrotate(self, array, count):
         return (array[-count:]) + array[:-count]
 
-    def build_blocks(self):
+    def __build_blocks(self):
         for block_start in range(0, len(self.binary_message), 512):
             self.blocks.append(self.binary_message[block_start:block_start + 512])
 
-    def create_message_schedule(self, block):
+    def __create_message_schedule(self, block):
         schedules = []
         for block in self.blocks:
             for chunk_start in range(0, len(block), 32):
@@ -98,7 +98,7 @@ class Sha256:
 
         return schedules
 
-    def pad_message(self):
+    def __pad_message(self):
         original_length = len(self.binary_message)
         self.binary_message.append(1)
         while (len(self.binary_message)) % 512 != 448:
@@ -109,7 +109,7 @@ class Sha256:
         for binary_digit in bin(original_length)[2:]:
             self.binary_message.append(int(binary_digit))
 
-    def calculate(self):
+    def __calculate(self):
         self.pad_message()
         self.build_blocks()
 
@@ -150,7 +150,7 @@ class Sha256:
             self.h7 = self.array_sum(self.h7, h)
         self.digest = self.h0 + self.h1 + self.h2 + self.h3 + self.h4 + self.h5 + self.h6 + self.h7
 
-    def calculate_hash_from_file(self,file_path):
+    def __calculate_hash_from_file(self,file_path):
         file = open(file_path,'rb')
         self.binary_message.fromfile(file)
         self.calculate()
