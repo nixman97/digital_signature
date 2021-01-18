@@ -29,7 +29,7 @@ class Sha256:
         for i in k_int:
             self.k.append(bitarray(format(i, "032b")))
 
-    def __logic_and(self, array1, array2):
+    def _logic_and(self, array1, array2):
         return_array = bitarray()
         for i in range(len(array1)):
             if array1[i] == 1 and array2[i] == 1:
@@ -38,7 +38,7 @@ class Sha256:
                 return_array.append(0)
         return return_array
 
-    def __logic_not(self, array):
+    def _logic_not(self, array):
         return_array = bitarray()
         for i in range(len(array)):
             if array[i] == 0:
@@ -47,7 +47,7 @@ class Sha256:
                 return_array.append(0)
         return return_array
 
-    def __array_sum(self, array1, array2):
+    def _array_sum(self, array1, array2):
         return_array = bitarray()
         hold = 0
         for i in range(32):
@@ -60,7 +60,7 @@ class Sha256:
                 hold = 0
         return return_array
 
-    def __xor(self, array1, array2):
+    def _xor(self, array1, array2):
         return_array = bitarray()
         for i in range(len(array1)):
             if (array1[i] == 1 and array2[i] == 0) or (array1[i] == 0 and array2[i] == 1):
@@ -69,36 +69,33 @@ class Sha256:
                 return_array.append(0)
         return return_array
 
-    def __leftshift(self, array, count):
-        return array[count:] + (bitarray('0') * count)
-
-    def __rightshift(self, array, count):
+    def _rightshift(self, array, count):
         return (bitarray('0') * count) + array[:-count]
 
-    def __rightrotate(self, array, count):
+    def _rightrotate(self, array, count):
         return (array[-count:]) + array[:-count]
 
-    def __build_blocks(self):
+    def _build_blocks(self):
         for block_start in range(0, len(self.binary_message), 512):
             self.blocks.append(self.binary_message[block_start:block_start + 512])
 
-    def __create_message_schedule(self, block):
+    def _create_message_schedule(self, block):
         schedules = []
         for block in self.blocks:
             for chunk_start in range(0, len(block), 32):
                 schedules.append(block[chunk_start: chunk_start + 32])
         for i in range(16, 64):
             # schedules.append(bitarray())
-            s0 = self.xor(self.xor(self.rightrotate(schedules[i - 15], 7), self.rightrotate(schedules[i - 15], 18)),
-                          self.rightshift(schedules[i - 15], 3))
-            s1 = self.xor(self.xor(self.rightrotate(schedules[i - 2], 17),
-                                   self.rightrotate(schedules[i - 2], 19)), self.rightshift(schedules[i - 2], 10))
+            s0 = self._xor(self._xor(self._rightrotate(schedules[i - 15], 7), self._rightrotate(schedules[i - 15], 18)),
+                           self._rightshift(schedules[i - 15], 3))
+            s1 = self._xor(self._xor(self._rightrotate(schedules[i - 2], 17),
+                                     self._rightrotate(schedules[i - 2], 19)), self._rightshift(schedules[i - 2], 10))
             schedules.append(
-                self.array_sum(self.array_sum(self.array_sum(schedules[i - 16], s0), schedules[i - 7]), s1))
+                self._array_sum(self._array_sum(self._array_sum(schedules[i - 16], s0), schedules[i - 7]), s1))
 
         return schedules
 
-    def __pad_message(self):
+    def _pad_message(self):
         original_length = len(self.binary_message)
         self.binary_message.append(1)
         while (len(self.binary_message)) % 512 != 448:
@@ -109,13 +106,13 @@ class Sha256:
         for binary_digit in bin(original_length)[2:]:
             self.binary_message.append(int(binary_digit))
 
-    def __calculate(self):
-        self.pad_message()
-        self.build_blocks()
+    def _calculate(self):
+        self._pad_message()
+        self._build_blocks()
 
         print(len(self.blocks))
         for block in self.blocks:
-            schedules = self.create_message_schedule(block)
+            schedules = self._create_message_schedule(block)
             a = self.h0
             b = self.h1
             c = self.h2
@@ -125,34 +122,34 @@ class Sha256:
             g = self.h6
             h = self.h7
             for i in range(64):
-                S1 = self.xor(self.xor(self.rightrotate(e, 6), self.rightrotate(e, 11)), self.rightrotate(e, 25))
-                ch = self.xor(self.logic_and(e, f), self.logic_and(self.logic_not(e), g))
-                temp1 = self.array_sum(self.array_sum(self.array_sum(self.array_sum(h, S1), ch), self.k[i]),
-                                       schedules[i])
-                S0 = self.xor(self.xor(self.rightrotate(a, 2), self.rightrotate(a, 13)), self.rightrotate(a, 22))
-                maj = self.xor(self.xor(self.logic_and(a, b), self.logic_and(a, c)), self.logic_and(b, c))
-                temp2 = self.array_sum(S0, maj)
+                S1 = self._xor(self._xor(self._rightrotate(e, 6), self._rightrotate(e, 11)), self._rightrotate(e, 25))
+                ch = self._xor(self._logic_and(e, f), self._logic_and(self._logic_not(e), g))
+                temp1 = self._array_sum(self._array_sum(self._array_sum(self._array_sum(h, S1), ch), self.k[i]),
+                                        schedules[i])
+                S0 = self._xor(self._xor(self._rightrotate(a, 2), self._rightrotate(a, 13)), self._rightrotate(a, 22))
+                maj = self._xor(self._xor(self._logic_and(a, b), self._logic_and(a, c)), self._logic_and(b, c))
+                temp2 = self._array_sum(S0, maj)
                 h = g
                 g = f
                 f = e
-                e = self.array_sum(d, temp1)
+                e = self._array_sum(d, temp1)
                 d = c
                 c = b
                 b = a
-                a = self.array_sum(temp1, temp2)
-            self.h0 = self.array_sum(self.h0, a)
-            self.h1 = self.array_sum(self.h1, b)
-            self.h2 = self.array_sum(self.h2, c)
-            self.h3 = self.array_sum(self.h3, d)
-            self.h4 = self.array_sum(self.h4, e)
-            self.h5 = self.array_sum(self.h5, f)
-            self.h6 = self.array_sum(self.h6, g)
-            self.h7 = self.array_sum(self.h7, h)
+                a = self._array_sum(temp1, temp2)
+            self.h0 = self._array_sum(self.h0, a)
+            self.h1 = self._array_sum(self.h1, b)
+            self.h2 = self._array_sum(self.h2, c)
+            self.h3 = self._array_sum(self.h3, d)
+            self.h4 = self._array_sum(self.h4, e)
+            self.h5 = self._array_sum(self.h5, f)
+            self.h6 = self._array_sum(self.h6, g)
+            self.h7 = self._array_sum(self.h7, h)
         self.digest = self.h0 + self.h1 + self.h2 + self.h3 + self.h4 + self.h5 + self.h6 + self.h7
 
-    def __calculate_hash_from_file(self,file_path):
+    def calculate_hash_from_file(self,file_path):
         file = open(file_path,'rb')
         self.binary_message.fromfile(file)
-        self.calculate()
+        self._calculate()
         file.close()
         return hex(int(str(self.digest)[10:-2],2))[2:]
