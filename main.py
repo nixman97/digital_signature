@@ -1,16 +1,17 @@
-# This is a sample Python script.
+from bitarray import bitarray
 
-# Press Shift+F10 to execute it or replace it with your code.
-# Press Double Shift to search everywhere for classes, files, tool windows, actions, and settings.
+from Sha256 import Sha256
+import hashlib
 
-
-def print_hi(name):
-    # Use a breakpoint in the code line below to debug your script.
-    print(f'Hi, {name}')  # Press Ctrl+F8 to toggle the breakpoint.
-
-
-# Press the green button in the gutter to run the script.
+filename = "hello world"
+with open(filename, "rb") as f:
+    bytes = f.read()  # read entire file as bytes
+    readable_hash = hashlib.sha256(bytes).hexdigest()
+    print(readable_hash)
 if __name__ == '__main__':
-    print_hi('PyCharm')
+    a=bitarray()
+    a.fromfile(open("hello world",'rb'))
+    print(a)
+    print(Sha256().calculate_hash_from_file("hello world"))
 
-# See PyCharm help at https://www.jetbrains.com/help/pycharm/
+
