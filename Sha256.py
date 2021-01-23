@@ -81,9 +81,9 @@ class Sha256:
 
     def _create_message_schedule(self, block):
         schedules = []
-        for block in self.blocks:
-            for chunk_start in range(0, len(block), 32):
-                schedules.append(block[chunk_start: chunk_start + 32])
+
+        for chunk_start in range(0, len(block), 32):
+            schedules.append(block[chunk_start: chunk_start + 32])
         for i in range(16, 64):
             # schedules.append(bitarray())
             s0 = self._xor(self._xor(self._rightrotate(schedules[i - 15], 7), self._rightrotate(schedules[i - 15], 18)),
@@ -109,7 +109,7 @@ class Sha256:
     def _calculate(self):
         self._pad_message()
         self._build_blocks()
-
+        print(self.binary_message)
         print(len(self.blocks))
         for block in self.blocks:
             schedules = self._create_message_schedule(block)
