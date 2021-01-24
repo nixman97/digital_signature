@@ -1,17 +1,24 @@
 import os
+import shutil
 
 import rsa
+
+from Utils import Utils
+
+
 class FileSigner:
     def __init__(self):
         pass
 
+    def import_public_key(self,key_path,alias):
+        shutil.move(key_path,"Pubkeys/"+alias+"_publickey.key")
     def _check_name_existance(self, name, my_key):
         dir_name="Pubkeys"
         if my_key==True:
             dir_name="MyKeys"
         for filename in os.listdir(dir_name):
             if filename.split("_")[0]==name:
-                return True
+                return filename
         return False
 
     def generate_new_key(self,name):
@@ -36,13 +43,13 @@ class FileSigner:
         keys=[]
         for filename in os.listdir("Pubkeys"):
             if filename.__contains__("publickey.key"):
-                key_entry=(filename.split("_")[0],open(filename,'r').read())
+                key_entry=(filename.split("_")[0],open("Pubkeys/"+filename,'r').read())
                 keys.append(key_entry)
         return keys
 
 
-    def sign(self,key_file, file_to_sign):
-        key_file = open(key_file,'rb')
+    def _sign(self, key_file, file_to_sign):
+        key_file = open("MyKeys/"+key_file,'rb')
         key_data = key_file.read()
         key_file.close()
         file_to_sign = open(file_to_sign,'rb')
@@ -53,15 +60,32 @@ class FileSigner:
         signature=rsa.sign(file_data,privkey,'SHA-512')
         return signature
 
+    def sign(self,key_alias,file_to_sign):
+        return self._sign(key_alias+"_privkey.key",file_to_sign)
+
     def _verify_signature(self,pubkey_alias,file_to_be_verified):
-        pubkey_file=open("Pubkeys/"+pubkey_alias+"_publickey.key",'rb')
+        pubkey=open("Pubkeys/"+pubkey_alias+"_publickey.key",'rb').read()
         file_to_be_verified = open(file_to_be_verified,'rb')
-        pubkey_file.close()
-        file_to_be_verified.close()
-        pubkey_file_data = pubkey_file.read()
+        pubkey=rsa.PublicKey.load_pkcs1(pubkey)
+
+        signature=open('temp/signature','rb').read()
         file_to_be_verified_data = file_to_be_verified.read()
+        file_to_be_verified.close()
+        try:
+            rsa.verify(file_to_be_verified_data,signature , pubkey)
+            return pubkey_alias
+        except:
+            return False
 
     def verify_signature(self, file_to_be_verified):
-        file_to_be_verified = open(file_to_be_verified, 'rb')
-        file_to_be_verified.close()
-        return "Good. File has been signed by"
+        Utils().unzip_files(file_to_be_verified)
+
+        pubkey=open('temp/pkey.key').read()
+        for filename in os.listdir("temp"):
+            if filename not in ["pkey.key","signature"]:
+                file_to_be_verified="temp/"+filename
+        for filename in os.listdir("Pubkeys"):
+            file=open("Pubkeys/"+filename)
+            if file.read()==pubkey:
+                return self._verify_signature(filename.split("_")[0],file_to_be_verified)
+        return 2
