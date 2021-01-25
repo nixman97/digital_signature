@@ -72,7 +72,9 @@ class Utils:
         try:
             pyAesCrypt.decryptStream(io.BytesIO(open(in_filename, 'rb').read()), f_dec, Utils.password, buffer_size,
                                      1991)
+
         except:
+            f_dec.seek(0)
             pyAesCrypt.decryptStream(io.BytesIO(open(in_filename, 'rb').read()), f_dec, Utils.password, buffer_size,
                                      2007)
         return f_dec.getvalue()
@@ -96,6 +98,7 @@ class Utils:
             if filename.__contains__("privkey.key"):
                 if (self.file_encrypted("MyKeys/" + filename)):
                     decrypted = self.decrypt_file("MyKeys/" + filename)
+                    os.remove("MyKeys/" + filename)
                     open("MyKeys/" + filename, 'wb').write(decrypted)
 
     def set_passkey(self, key):
@@ -108,6 +111,7 @@ class Utils:
     def remove_passkey(self):
         os.remove("pass")
         self.decrypt_all()
+        Utils.password=""
 
     def check_pass_set(self):
         if (os.path.exists("pass")):

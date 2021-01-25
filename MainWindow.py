@@ -102,8 +102,7 @@ class MainWindow(QWidget):
         main_layout.addLayout(wind_layout)
         self.setLayout(main_layout)
         self.show()
-        if cancel:
-            self.exit_app()
+
 
     def exit_app(self):
         self.close()
@@ -290,14 +289,13 @@ class MainWindow(QWidget):
                             msg_box.setText(
                                 "WARNING!!! DO NOT TRUST!!! Signature check failed. File has been modified! The key remains imported. If you wish, you can delete it manually")
                             msg_box.exec()
-
-                    else:
-                        msg_box = QMessageBox()
-                        msg_box.setWindowTitle("Verification result")
-                        msg_box.setStandardButtons(QMessageBox.Ok)
-                        msg_box.setIcon(QMessageBox.Information)
-                        msg_box.setText("File has been signed by " + result[0] + "(The newly added key)")
-                        msg_box.exec()
+                        else:
+                            msg_box = QMessageBox()
+                            msg_box.setWindowTitle("Verification result")
+                            msg_box.setStandardButtons(QMessageBox.Ok)
+                            msg_box.setIcon(QMessageBox.Information)
+                            msg_box.setText("File has been signed by " + result[0] + "(The newly added key)")
+                            msg_box.exec()
                 else:
                     print('No clicked.')
 
