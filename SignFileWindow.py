@@ -1,7 +1,7 @@
 from PyQt5.QtGui import QIcon
 from PyQt5.QtWidgets import QDialog, QLabel, QPushButton, QHBoxLayout, QVBoxLayout, QFileDialog, QMessageBox
 from PyQt5.uic.Compiler.qtproxies import QtGui
-
+from os import path
 from FileSigner import FileSigner
 from Utils import Utils
 
@@ -59,5 +59,15 @@ class SignFileWindow(QDialog):
     def export_signed_file(self):
         file_signer = FileSigner()
         signature = file_signer.sign(self.name_alias, self.file_open_path)
+        if path.exists("MyKeys/"+self.name_alias+"_ca_bundle.crt"):
+            Utils().zip_files(self.file_save_path[0], self.file_open_path, self.name_alias, signature)
+
         Utils().zip_files(self.file_save_path[0], self.file_open_path,self.name_alias, signature)
+        msg_box = QMessageBox()
+        msg_box.setIcon(QMessageBox.Information)
+        msg_box.setText(
+            "Success")
+        msg_box.setWindowTitle("Archive exported successfully to "+self.file_save_path[0])
+        msg_box.setStandardButtons(QMessageBox.Ok)
+        msg_box.exec()
         self.close()

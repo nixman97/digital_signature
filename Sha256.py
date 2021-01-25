@@ -153,3 +153,8 @@ class Sha256:
         self._calculate()
         file.close()
         return hex(int(str(self.digest)[10:-2],2))[2:]
+    def calculate_from_string(self,string):
+        self.binary_message.frombytes(string.encode())
+        self._calculate()
+        return bytearray(self.digest)
+        return hex(int(str(self.digest)[10:-2],2))[2:]

@@ -20,6 +20,7 @@ sys.exit(app.exec_())
 hash = int.from_bytes(sha512(msg).digest(), byteorder='big')
 signature = pow(hash, keyPair.d, keyPair.n)
 print("Signature:", hex(signature))
+
 if __name__ == '__main__':
 
     a = bitarray()
